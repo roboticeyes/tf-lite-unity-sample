@@ -7,10 +7,10 @@ using TensorFlowLite;
 
 public class SsdSample : MonoBehaviour
 {
-    [SerializeField, FilePopup("*.tflite")] string fileName = "coco_ssd_mobilenet_quant.tflite";
+    [SerializeField, FilePopup ("*.tflite")] string fileName = "coco_ssd_mobilenet_quant.tflite";
     [SerializeField] RawImage cameraView = null;
     [SerializeField] Text framePrefab = null;
-    [SerializeField, Range(0f, 1f)] float scoreThreshold = 0.5f;
+    [SerializeField, Range (0f, 1f)] float scoreThreshold = 0.5f;
     [SerializeField] TextAsset labelMap = null;
 
     WebCamTexture webcamTexture;
@@ -23,26 +23,26 @@ public class SsdSample : MonoBehaviour
     void Start()
     {
 
-        string path = Path.Combine(Application.streamingAssetsPath, fileName);
-        ssd = new SSD(path);
+        string path = Path.Combine (Application.streamingAssetsPath, fileName);
+        ssd = new SSD (path);
 
         // Init camera
         string cameraName = WebCamUtil.FindName();
-        webcamTexture = new WebCamTexture(cameraName, 1280, 720, 30);
+        webcamTexture = new WebCamTexture (cameraName, 1280, 720, 30);
         cameraView.texture = webcamTexture;
         webcamTexture.Play();
-        Debug.Log($"Starting camera: {cameraName}");
+        Debug.Log ($"Starting camera: {cameraName}");
 
         // Init frames
         frames = new Text[10];
         var parent = cameraView.transform;
         for (int i = 0; i < frames.Length; i++)
         {
-            frames[i] = Instantiate(framePrefab, Vector3.zero, Quaternion.identity, parent);
+            frames[i] = Instantiate (framePrefab, Vector3.zero, Quaternion.identity, parent);
         }
 
         // Labels
-        labels = labelMap.text.Split('\n');
+        labels = labelMap.text.Split ('\n');
 
 
     }
@@ -55,30 +55,31 @@ public class SsdSample : MonoBehaviour
 
     void Update()
     {
-        ssd.Invoke(webcamTexture);
+        Debug.Log ("" + Time.deltaTime * 1000f + " ms");
+        ssd.Invoke (webcamTexture);
 
         var results = ssd.GetResults();
 
         var size = cameraView.rectTransform.rect.size;
         for (int i = 0; i < 10; i++)
         {
-            SetFrame(frames[i], results[i], size);
+            SetFrame (frames[i], results[i], size);
         }
 
         cameraView.material = ssd.transformMat;
         // cameraView.texture = ssd.inputTex;
     }
 
-    void SetFrame(Text frame, SSD.Result result, Vector2 size)
+    void SetFrame (Text frame, SSD.Result result, Vector2 size)
     {
         if (result.score < scoreThreshold)
         {
-            frame.gameObject.SetActive(false);
+            frame.gameObject.SetActive (false);
             return;
         }
         else
         {
-            frame.gameObject.SetActive(true);
+            frame.gameObject.SetActive (true);
         }
 
         frame.text = $"{GetLabelName(result.classID)} : {(int)(result.score * 100)}%";
@@ -87,7 +88,7 @@ public class SsdSample : MonoBehaviour
         rt.sizeDelta = result.rect.size * size;
     }
 
-    string GetLabelName(int id)
+    string GetLabelName (int id)
     {
         if (id < 0 || id >= labels.Length - 1)
         {
